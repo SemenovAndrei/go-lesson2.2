@@ -17,7 +17,7 @@ func main() {
 	fmt.Println(list.CardSvc)
 	fmt.Println(card1, card2)
 
-	fmt.Println(list.Card2Card("5106 2100 0000 0007", "5106 2100 0000 0000 6", 1000))
+	fmt.Println(list.Card2Card("5106 2100 0000 0007", "5106 2100 0000 0000 6", 100))
 
 	fmt.Println(card1, card2)
 }

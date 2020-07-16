@@ -57,7 +57,7 @@ func TestService_Card2Card(t *testing.T) {
 				to:     "0003",
 				amount: 100,
 			},
-			want: ErrCardTo,
+			want: card.ErrCard,
 		},
 		{
 			name: "cardFrom yes, cardTo no, balance not ok",
@@ -66,7 +66,7 @@ func TestService_Card2Card(t *testing.T) {
 				to:     "0003",
 				amount: 10000,
 			},
-			want: ErrCardTo,
+			want: ErrCard,
 		},
 		{
 			name: "cardFrom no, cardTo yes, balance ok",
@@ -75,7 +75,7 @@ func TestService_Card2Card(t *testing.T) {
 				to:     "0001",
 				amount: 100,
 			},
-			want: ErrCardFrom,
+			want: ErrCard,
 		},
 		{
 			name: "cardFrom no, cardTo yes, balance not ok",
@@ -100,5 +100,44 @@ func TestService_Card2Card(t *testing.T) {
 			if got != tt.want {
 				t.Errorf("Card2Card() got = %v, want %v", got, tt.want)
 			}
+	}
+}
+
+func TestService_Card2Card1(t *testing.T) {
+	type fields struct {
+		CardSvc               *card.Service
+		CommissionToTinkoff   int64
+		CommissionFromTinkoff int64
+		MinimumFromTinkoff    int64
+		CommissionOther       int64
+		MinimumOther          int64
+	}
+	type args struct {
+		from   string
+		to     string
+		amount int64
+	}
+	tests := []struct {
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
+	}{
+		// TODO: Add test cases.
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			s := &Service{
+				CardSvc:               tt.fields.CardSvc,
+				CommissionToTinkoff:   tt.fields.CommissionToTinkoff,
+				CommissionFromTinkoff: tt.fields.CommissionFromTinkoff,
+				MinimumFromTinkoff:    tt.fields.MinimumFromTinkoff,
+				CommissionOther:       tt.fields.CommissionOther,
+				MinimumOther:          tt.fields.MinimumOther,
+			}
+			if err := s.Card2Card(tt.args.from, tt.args.to, tt.args.amount); (err != nil) != tt.wantErr {
+				t.Errorf("Card2Card() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
 	}
 }

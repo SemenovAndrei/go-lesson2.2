@@ -48,11 +48,14 @@ func (s *Service) CheckNumber(number, name string) (*Card, error, bool) {
 		return nil, ErrCardNoValid, false
 	}
 
-	for _, c := range s.Cards {
-		if strings.HasPrefix(c.Number, "5106 21") {
-			return c, nil, true
+	if strings.HasPrefix(str, "510621") {
+		for _, c := range s.Cards {
+			if strings.ReplaceAll(c.Number, " ", "") == str {
+				return c, nil, true
+			}
 		}
 	}
+
 	return nil, ErrCard, false
 }
 
