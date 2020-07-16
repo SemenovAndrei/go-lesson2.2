@@ -6,8 +6,6 @@ import (
 )
 
 var ErrFromCardBalance = errors.New("transfer amount is greater than balance")
-var ErrCardFrom = errors.New("card from not found")
-var ErrCardTo = errors.New("card to not found")
 
 type Service struct {
 	CardSvc *card.Service
@@ -37,13 +35,14 @@ func (s *Service) Card2Card(from string, to string, amount int64) error {
 	total := amount + commision
 
 
-	cardFrom, ok := s.CardSvc.CheckNumber(from)
+	cardFrom, err, ok := s.CardSvc.CheckNumber(from, "from")
 	if !ok {
-		return ErrCardFrom
+		return err
 	}
-	cardTo, ok := s.CardSvc.CheckNumber(to)
+
+	cardTo, err, ok := s.CardSvc.CheckNumber(to, "to")
 	if !ok {
-		return ErrCardTo
+		return err
 	}
 
 	if cardFrom.Balance < total {
