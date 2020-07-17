@@ -108,18 +108,16 @@ func TestService_Card2Card(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
 			s := &Service{
-				CardSvc:               tt.fields.CardSvc,
-				CommissionToTinkoff:   tt.fields.CommissionToTinkoff,
-				CommissionFromTinkoff: tt.fields.CommissionFromTinkoff,
-				MinimumFromTinkoff:    tt.fields.MinimumFromTinkoff,
-				CommissionOther:       tt.fields.CommissionOther,
-				MinimumOther:          tt.fields.MinimumOther,
+				CardSvc: cardSvc,
+				CommissionToTinkoff: 0,
+				CommissionFromTinkoff: 5,
+				MinimumFromTinkoff: 10,
+				CommissionOther: 15,
+				MinimumOther: 30,
 			}
 			if err := s.Card2Card(tt.args.from, tt.args.to, tt.args.amount); (err != nil) != tt.wantErr {
 				t.Errorf("Card2Card() error = %v, wantErr %v", err, tt.wantErr)
 			}
-		})
 	}
 }
