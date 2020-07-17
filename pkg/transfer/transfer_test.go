@@ -81,7 +81,7 @@ func TestService_Card2Card(t *testing.T) {
 				amount: 100,
 			},
 			want: 100,
-			want1: true,
+			want1: false,
 		},
 		{
 			name: "no-no",
