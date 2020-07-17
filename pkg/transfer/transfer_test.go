@@ -16,103 +16,14 @@ func TestService_Card2Card(t *testing.T) {
 		CommissionOther       int64
 		MinimumOther          int64
 	}
-	cardSvc := card.NewService("Tinkoff")
+		cardSvc := card.NewService("Tinkoff")
 
-	cardSvc.GetNewCard("visa", 1000, "RUB", "0001")
-	cardSvc.GetNewCard("visa", 100, "RUB", "0002")
+		cardSvc.GetNewCard("visa", 1000, "RUB", "5106 2100 0000 0007")
+		cardSvc.GetNewCard("visa", 100, "RUB", "5106 2100 0000 0000 6")
 
-	type args struct {
-		from   string
-		to     string
-		amount int64
-	}
-	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   error
-	}{
-		{
-			name: "cardFrom yes, cardTo yes, balance ok",
-			args: args{
-				from:   "0001",
-				to:     "0002",
-				amount: 100,
-			},
-			want: nil,
-		},
-		{
-			name: "cardFrom yes, cardTo yes, balance not ok",
-			args: args{
-				from:   "0001",
-				to:     "0002",
-				amount: 10000,
-			},
-			want: ErrFromCardBalance,
-		},
-		{
-			name: "cardFrom yes, cardTo no, balance ok",
-			args: args{
-				from:   "0001",
-				to:     "0003",
-				amount: 100,
-			},
-			want: card.ErrCard,
-		},
-		{
-			name: "cardFrom yes, cardTo no, balance not ok",
-			args: args{
-				from:   "0001",
-				to:     "0003",
-				amount: 10000,
-			},
-			want: ErrCard,
-		},
-		{
-			name: "cardFrom no, cardTo yes, balance ok",
-			args: args{
-				from:   "0003",
-				to:     "0001",
-				amount: 100,
-			},
-			want: ErrCard,
-		},
-		{
-			name: "cardFrom no, cardTo yes, balance not ok",
-			args: args{
-				from:   "0003",
-				to:     "0001",
-				amount: 10000,
-			},
-			want: ErrCardFrom,
-		},
-	}
-	for _, tt := range tests {
-			s := &Service{
-				CardSvc: cardSvc,
-				CommissionToTinkoff: 0,
-				CommissionFromTinkoff: 5,
-				MinimumFromTinkoff: 10,
-				CommissionOther: 15,
-				MinimumOther: 30,
-			}
-			got := s.Card2Card(tt.args.from, tt.args.to, tt.args.amount)
-			if got != tt.want {
-				t.Errorf("Card2Card() got = %v, want %v", got, tt.want)
-			}
-	}
-}
 
-func TestService_Card2Card1(t *testing.T) {
-	type fields struct {
-		CardSvc               *card.Service
-		CommissionToTinkoff   int64
-		CommissionFromTinkoff int64
-		MinimumFromTinkoff    int64
-		CommissionOther       int64
-		MinimumOther          int64
-	}
-	type args struct {
+
+		type args struct {
 		from   string
 		to     string
 		amount int64
@@ -123,7 +34,78 @@ func TestService_Card2Card1(t *testing.T) {
 		args    args
 		wantErr bool
 	}{
-		// TODO: Add test cases.
+		{
+			name: "cardFrom yes, cardTo yes, balance ok",
+			args: args{
+				from:   "5106 2100 0000 0007",
+				to:     "5106 2100 0000 0000 6",
+				amount: 100,
+			},
+			wantErr: false,
+		},
+		{
+			name: "cardFrom yes, cardTo yes, balance not ok",
+			args: args{
+				from:   "5106 2100 0000 0007",
+				to:     "5106 2100 0000 0000 6",
+				amount: 100000,
+			},
+			wantErr: true,
+		},
+		{
+			name: "cardFrom yes, cardTo not found, balance ok",
+			args: args{
+				from:   "5106 2100 0000 0007",
+				to:     "51106 2100 0000 0000 6",
+				amount: 100,
+			},
+			wantErr: true,
+		},
+		{
+			name: "cardFrom not found, cardTo yes, balance ok",
+			args: args{
+				from:   "511206 2100 0000 0007",
+				to:     "5106 2100 0000 0000 6",
+				amount: 100,
+			},
+			wantErr: true,
+		},
+		{
+			name: "cardFrom not found, cardTo not found, balance ok",
+			args: args{
+				from:   "51106 2100 0000 0007",
+				to:     "51106 2100 0000 0000 6",
+				amount: 100,
+			},
+			wantErr: true,
+		},
+		{
+			name: "cardFrom yes, cardTo not valid, balance ok",
+			args: args{
+				from:   "5106 2100 0000 0007",
+				to:     "5106 2100 0000 01000 6",
+				amount: 100,
+			},
+			wantErr: true,
+		},
+		{
+			name: "cardFrom not valid, cardTo yes, balance ok",
+			args: args{
+				from:   "5106 2100 0000 0407",
+				to:     "5106 2100 0000 0000 6",
+				amount: 100,
+			},
+			wantErr: true,
+		},
+		{
+			name: "cardFrom not valid, cardTo not valid, balance ok",
+			args: args{
+				from:   "5106 2100 0000 0207",
+				to:     "5106 2100 0000 00030 6",
+				amount: 100,
+			},
+			wantErr: true,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
