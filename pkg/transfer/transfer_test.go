@@ -30,68 +30,61 @@ func TestService_Card2Card(t *testing.T) {
 		name   string
 		fields fields
 		args   args
-		want   int64
-		want1  bool
+		want   error
 	}{
 		{
-			name: "yes-yes-ok",
+			name: "cardFrom yes, cardTo yes, balance ok",
 			args: args{
 				from:   "0001",
 				to:     "0002",
 				amount: 100,
 			},
-			want: 100,
-			want1: true,
+			want: nil,
 		},
 		{
-			name: "yes-yes-not",
+			name: "cardFrom yes, cardTo yes, balance not ok",
 			args: args{
 				from:   "0001",
 				to:     "0002",
 				amount: 10000,
 			},
-			want: 10000,
-			want1: false,
+			want: ErrFromCardBalance,
 		},
 		{
-			name: "yes-no-ok",
+			name: "cardFrom yes, cardTo no, balance ok",
 			args: args{
 				from:   "0001",
 				to:     "0003",
 				amount: 100,
 			},
-			want: 110,
-			want1: true,
+			want: ErrCardTo,
 		},
 		{
-			name: "yes-no-not",
+			name: "cardFrom yes, cardTo no, balance not ok",
 			args: args{
 				from:   "0001",
 				to:     "0003",
 				amount: 10000,
 			},
-			want: 10050,
-			want1: false,
+			want: ErrCardTo,
 		},
 		{
-			name: "no-yes",
+			name: "cardFrom no, cardTo yes, balance ok",
 			args: args{
 				from:   "0003",
-				to:     "0002",
+				to:     "0001",
 				amount: 100,
 			},
-			want: 100,
-			want1: true,
+			want: ErrCardFrom,
 		},
 		{
-			name: "no-no",
+			name: "cardFrom no, cardTo yes, balance not ok",
 			args: args{
 				from:   "0003",
-				to:     "0004",
-				amount: 1000,
+				to:     "0001",
+				amount: 10000,
 			},
-			want: 1030,
-			want1: true,
+			want: ErrCardFrom,
 		},
 	}
 	for _, tt := range tests {
@@ -103,12 +96,9 @@ func TestService_Card2Card(t *testing.T) {
 				CommissionOther: 15,
 				MinimumOther: 30,
 			}
-			got, got1 := s.Card2Card(tt.args.from, tt.args.to, tt.args.amount)
+			got := s.Card2Card(tt.args.from, tt.args.to, tt.args.amount)
 			if got != tt.want {
 				t.Errorf("Card2Card() got = %v, want %v", got, tt.want)
-			}
-			if got1 != tt.want1 {
-				t.Errorf("Card2Card() got1 = %v, want %v", got1, tt.want1)
 			}
 	}
 }
