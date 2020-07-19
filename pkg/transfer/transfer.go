@@ -5,8 +5,6 @@ import (
 	"github.com/i-hit/go-lesson2.2.git/pkg/card"
 )
 
-var ErrFromCardBalance = errors.New("transfer amount is greater than balance")
-
 type Service struct {
 	CardSvc *card.Service
 	// поля для хранения:
@@ -29,19 +27,21 @@ func NewService(cardSvc *card.Service) *Service {
 	}
 }
 
+var ErrFromCardBalance = errors.New("transfer amount is greater than balance")
+
+
 func (s *Service) Card2Card(from string, to string, amount int64) error {
-	// TODO: ваш код
-	commision := s.CommissionToTinkoff
-	total := amount + commision
+	commission := s.CommissionToTinkoff
+	total := amount + commission
 
 
-	cardFrom, err, ok := s.CardSvc.CheckNumber(from, "from")
-	if !ok {
+	cardFrom, err := s.CardSvc.CheckNumber(from, "cardFrom")
+	if err != nil {
 		return err
 	}
 
-	cardTo, err, ok := s.CardSvc.CheckNumber(to, "to")
-	if !ok {
+	cardTo, err := s.CardSvc.CheckNumber(to, "cardTo")
+	if err != nil {
 		return err
 	}
 

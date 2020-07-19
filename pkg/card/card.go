@@ -2,6 +2,7 @@ package card
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -37,26 +38,28 @@ func (s *Service) GetNewCard(issuer string, balance int64, currency string, numb
 	return card
 }
 
-func (s *Service) CheckNumber(number, name string) (*Card, error, bool) {
-	var ErrCardNoValid = errors.New("wrong card " + name + " number")
-	var ErrCard = errors.New("card " + name + " not found")
+// errors messages
+var ErrCardNoValid = errors.New("wrong number")
+var ErrCard = errors.New("card not found")
+
+func (s *Service) CheckNumber(number, name string) (*Card, error) {
 
 	str := strings.ReplaceAll(number," ", "")
 
 	ok := isValid(str)
 	if !ok {
-		return nil, ErrCardNoValid, false
+		return nil, fmt.Errorf("%w. Card name: %s", ErrCardNoValid, name)
 	}
 
 	if strings.HasPrefix(str, "510621") {
 		for _, c := range s.Cards {
 			if strings.ReplaceAll(c.Number, " ", "") == str {
-				return c, nil, true
+				return c, nil
 			}
 		}
 	}
 
-	return nil, ErrCard, false
+	return nil, fmt.Errorf("%w. Card name: %s", ErrCard, name)
 }
 
 func isValid(number string) bool {
