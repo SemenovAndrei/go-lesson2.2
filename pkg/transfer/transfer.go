@@ -1,8 +1,9 @@
 package transfer
 
-import "github.com/i-hit/go-lesson2.2.git/pkg/card"
-
-
+import (
+	"errors"
+	"github.com/i-hit/go-lesson2.2.git/pkg/card"
+)
 
 type Service struct {
 	CardSvc *card.Service
@@ -26,44 +27,30 @@ func NewService(cardSvc *card.Service) *Service {
 	}
 }
 
-func (s *Service) Card2Card(from string, to string, amount int64) (int64, bool) {
-	// TODO: ваш код
-	commision := s.CommissionToTinkoff
-	total := amount + commision
+var ErrFromCardBalance = errors.New("transfer amount is greater than balance")
 
-	cardTo, ok := s.CardSvc.CheckNumber(to)
-	if !ok {
-		cardFrom, ok := s.CardSvc.CheckNumber(from)
-		if !ok {
-			commision = s.CommissionOther * amount / 1000
-			if commision < s.MinimumOther {
-				commision = s.MinimumOther
-			}
-			total = amount + commision
-			return total, true
-		}
 
-		commision = s.CommissionFromTinkoff * amount / 1000
-		if commision < s.MinimumFromTinkoff {
-			commision = s.MinimumFromTinkoff
-		}
-		total = amount + commision
-		if cardFrom.Balance >= total {
-			cardFrom.Balance -= total
-			return total, true
-		}
-		return total, false
+func (s *Service) Card2Card(from string, to string, amount int64) error {
+	commission := s.CommissionToTinkoff
+	total := amount + commission
+
+
+	cardFrom, err := s.CardSvc.CheckNumber(from, "cardFrom")
+	if err != nil {
+		return err
 	}
-	cardFrom, ok := s.CardSvc.CheckNumber(from)
-	if ok {
-		if cardFrom.Balance >= total {
-			cardFrom.Balance -= total
-			cardTo.Balance += total
-			return total, true
-		}
-		return total, false
+
+	cardTo, err := s.CardSvc.CheckNumber(to, "cardTo")
+	if err != nil {
+		return err
 	}
+
+	if cardFrom.Balance < total {
+		return ErrFromCardBalance
+	}
+
+	cardFrom.Balance -= total
 	cardTo.Balance += total
 
-	return total, true
+	return nil
 }

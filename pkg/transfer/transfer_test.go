@@ -16,82 +16,95 @@ func TestService_Card2Card(t *testing.T) {
 		CommissionOther       int64
 		MinimumOther          int64
 	}
-	cardSvc := card.NewService("Tinkoff")
+		cardSvc := card.NewService("Tinkoff")
 
-	cardSvc.GetNewCard("visa", 1000, "RUB", "0001")
-	cardSvc.GetNewCard("visa", 100, "RUB", "0002")
+		cardSvc.GetNewCard("visa", 1000, "RUB", "5106 2100 0000 0007")
+		cardSvc.GetNewCard("visa", 100, "RUB", "5106 2100 0000 0000 6")
 
-	type args struct {
+
+
+		type args struct {
 		from   string
 		to     string
 		amount int64
 	}
 	tests := []struct {
-		name   string
-		fields fields
-		args   args
-		want   int64
-		want1  bool
+		name    string
+		fields  fields
+		args    args
+		wantErr bool
 	}{
 		{
-			name: "yes-yes-ok",
+			name: "cardFrom yes, cardTo yes, balance ok",
 			args: args{
-				from:   "0001",
-				to:     "0002",
+				from:   "5106 2100 0000 0007",
+				to:     "5106 2100 0000 0000 6",
 				amount: 100,
 			},
-			want: 100,
-			want1: true,
+			wantErr: false,
 		},
 		{
-			name: "yes-yes-not",
+			name: "cardFrom yes, cardTo yes, balance not ok",
 			args: args{
-				from:   "0001",
-				to:     "0002",
-				amount: 10000,
+				from:   "5106 2100 0000 0007",
+				to:     "5106 2100 0000 0000 6",
+				amount: 100000,
 			},
-			want: 10000,
-			want1: false,
+			wantErr: true,
 		},
 		{
-			name: "yes-no-ok",
+			name: "cardFrom yes, cardTo not found, balance ok",
 			args: args{
-				from:   "0001",
-				to:     "0003",
+				from:   "5106 2100 0000 0007",
+				to:     "51106 2100 0000 0000 6",
 				amount: 100,
 			},
-			want: 110,
-			want1: true,
+			wantErr: true,
 		},
 		{
-			name: "yes-no-not",
+			name: "cardFrom not found, cardTo yes, balance ok",
 			args: args{
-				from:   "0001",
-				to:     "0003",
-				amount: 10000,
-			},
-			want: 10050,
-			want1: false,
-		},
-		{
-			name: "no-yes",
-			args: args{
-				from:   "0003",
-				to:     "0002",
+				from:   "511206 2100 0000 0007",
+				to:     "5106 2100 0000 0000 6",
 				amount: 100,
 			},
-			want: 100,
-			want1: true,
+			wantErr: true,
 		},
 		{
-			name: "no-no",
+			name: "cardFrom not found, cardTo not found, balance ok",
 			args: args{
-				from:   "0003",
-				to:     "0004",
-				amount: 1000,
+				from:   "51106 2100 0000 0007",
+				to:     "51106 2100 0000 0000 6",
+				amount: 100,
 			},
-			want: 1030,
-			want1: true,
+			wantErr: true,
+		},
+		{
+			name: "cardFrom yes, cardTo not valid, balance ok",
+			args: args{
+				from:   "5106 2100 0000 0007",
+				to:     "5106 2100 0000 01000 6",
+				amount: 100,
+			},
+			wantErr: true,
+		},
+		{
+			name: "cardFrom not valid, cardTo yes, balance ok",
+			args: args{
+				from:   "5106 2100 0000 0407",
+				to:     "5106 2100 0000 0000 6",
+				amount: 100,
+			},
+			wantErr: true,
+		},
+		{
+			name: "cardFrom not valid, cardTo not valid, balance ok",
+			args: args{
+				from:   "5106 2100 0000 0207",
+				to:     "5106 2100 0000 00030 6",
+				amount: 100,
+			},
+			wantErr: true,
 		},
 	}
 	for _, tt := range tests {
@@ -103,12 +116,8 @@ func TestService_Card2Card(t *testing.T) {
 				CommissionOther: 15,
 				MinimumOther: 30,
 			}
-			got, got1 := s.Card2Card(tt.args.from, tt.args.to, tt.args.amount)
-			if got != tt.want {
-				t.Errorf("Card2Card() got = %v, want %v", got, tt.want)
-			}
-			if got1 != tt.want1 {
-				t.Errorf("Card2Card() got1 = %v, want %v", got1, tt.want1)
+			if err := s.Card2Card(tt.args.from, tt.args.to, tt.args.amount); (err != nil) != tt.wantErr {
+				t.Errorf("Card2Card() error = %v, wantErr %v", err, tt.wantErr)
 			}
 	}
 }
